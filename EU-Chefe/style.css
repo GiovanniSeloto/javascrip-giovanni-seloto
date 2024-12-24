@@ -91,7 +91,8 @@
 
     #resultado,
     #resultadoDica,
-    #tempo{
+    #tempo
+    #aviso{
         margin: 20px;
         font-size: 20px;
     }

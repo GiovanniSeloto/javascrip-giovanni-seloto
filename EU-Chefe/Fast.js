@@ -9,25 +9,28 @@ function ModeFast(container) {
             <div id="tempo"></div>
             <div id="resultado"></div>
             <div id="resultadoDica" style="display: none;"></div>
+            <div id="aviso"></div>
         </div>
     `;
 
     container.appendChild(modeContent);
 
     let listaDeTextos = [...personagens];
-
-    const fast = document.getElementById('fast')
+    const fast = document.getElementById('fast');
+    const desafio = document.getElementById('challenger');
     const botaoSortear = document.getElementById("sortear");
     const botaoContador = document.getElementById("botaoContador");
-    const tempoDiv = document.getElementById('tempo')
-    const body =document.getElementById('body')
+    const tempoDiv = document.getElementById('tempo');
+    const aviso = document.getElementById('aviso');
+    const body = document.body;
     let contador = 10;
-    let tempo = 60
+    let tempo = 60;
+    let intervaloTempo;
 
-    fast.style.display = 'none'
+    fast.style.display = 'none';
+    desafio.style.display = 'none';
 
     function sortearTexto() {
-
         if (listaDeTextos.length === 0) {
             document.getElementById("resultado").textContent = "Todos os textos já foram sorteados! Recarregue a página para reiniciar.";
             contador = 10;
@@ -50,34 +53,41 @@ function ModeFast(container) {
         botaoContador.textContent = "Pergunta Nº " + contador;
         botaoContador.disabled = false;
 
-        const tempoRestante = setInterval(() => {
+        if (intervaloTempo) {
+            clearInterval(intervaloTempo);
+            aviso.textContent=""
+        }
+
+        tempo = 60;
+        tempoDiv.textContent = `Tempo restante ${tempo}s`;
+
+        function atualizarCorDeFundo() {
+            const tempoProporcao = tempo / 60; 
+            const matizInicial = 120; // Verde
+            const matizFinal = 0;     // Vermelho
+            const matizAtual = matizInicial * tempoProporcao + matizFinal * (1 - tempoProporcao);
+            body.style.backgroundColor = `hsl(${matizAtual}, 100%, 50%)`;
+        }
+
+        atualizarCorDeFundo();
+
+        intervaloTempo = setInterval(() => {
             tempo--;
             tempoDiv.textContent = `Tempo restante ${tempo}s`;
-
-            // Calcula a proporção do tempo restante (entre 0 e 1)
-        const tempoProporcao = tempo / 60; 
-
-        // Interpola as cores usando hsl (matiz, saturação, luminosidade)
-        // Você pode ajustar os valores de matiz para obter diferentes transições de cor
-        const matizInicial = 120; // Verde
-        const matizFinal = 0;   // Vermelho
-        const matizAtual = matizInicial * tempoProporcao + matizFinal * (1 - tempoProporcao);
-
-        body.style.backgroundColor = `hsl(${matizAtual}, 100%, 50%)`;
+            atualizarCorDeFundo();
 
             if (tempo <= 0) {
-                clearInterval(tempoRestante)
+                clearInterval(intervaloTempo);
                 botaoContador.disabled = true;
                 tempoDiv.textContent = "Tempo Esgotado";
-                document.getElementById('resultado').textContent = "Você perdeu! O tempo se esgotou."
+                document.getElementById('resultado').textContent = "Você perdeu! O tempo se esgotou.";
             }
-        }, 1000)
+        }, 1000);
     }
 
     botaoSortear.addEventListener("click", sortearTexto);
 
     botaoContador.addEventListener("click", function () {
-
         contador--;
         botaoContador.textContent = "Pergunta Nº " + contador;
 
@@ -87,23 +97,23 @@ function ModeFast(container) {
 
         if (contador === 0) {
             botaoContador.disabled = true;
-            contador = 10;
+            contador = 0;
             botaoContador.textContent = "Pergunta Nº " + contador;
-            sortearTexto();
-            botaoContador.disabled = false;
+            botaoContador.disabled = true;
+            aviso.textContent = "Agora é com você, já foram feitas todas perguntas!";
         }
     });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const jogar = document.getElementById('fast')
+    const jogar = document.getElementById('fast');
 
     if (jogar) {
         jogar.addEventListener('click', () => {
-            const container = document.getElementById('modeContainer')
+            const container = document.getElementById('modeContainer');
             if (container) {
-                ModeFast(container)
+                ModeFast(container);
             }
-        })
+        });
     }
-})
+});

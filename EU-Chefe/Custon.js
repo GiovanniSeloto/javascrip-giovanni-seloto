@@ -1,115 +1,122 @@
-function ModeChallengeSelect(container) {
+function ModeChallenger(container) {
+    const fast = document.getElementById('fast');
+    const desafio = document.getElementById('challenger');
+    fast.style.display = 'none';
+    desafio.style.display = 'none';
+
     const modeContent = document.createElement('div');
     modeContent.innerHTML = `
-        <div id="containerChallengeMode">
-            <h3>Quem sou eu? - Modo Desafio</h3>
-            <button id="iniciarDesafio">Iniciar Desafio</button>
-            <div id="personagensSorteados" style="display: none;">
-                <div id="personagem1"></div>
-                <div id="personagem2"></div>
-                <div id="personagem3"></div>
-            </div>
-            <button id="pedirDica" style="display: none;">Pedir Dica</button>
-            <button id="botaoContador" style="display: none;">Pergunta Nº 1</button>
-            <div id="tempoRestante" style="display: none;">Tempo restante: 60s</div>
-            <div id="resultado"></div>
-            <div id="resultadoDica" style="display: none;"></div>
+        <div>ESTÃO PRONTOS PARA O DESAFIO ?</div>
+        <div>Insira o nome dos participantes:</div>
+        <div id="participantes"> 
+            <input type="text" placeholder="Participante" class="participante">
+            <input type="text" placeholder="Participante" class="participante">
+            <input type="text" placeholder="Participante" class="participante">
         </div>
+        <button id="adicionar">Adicionar Participante</button>
+        <button id="iniciar">Iniciar</button>
+        <div id="dica"></div>
+        <div id="resultado"></div>
+        <div id="personagens"></div>
+        <div id="turno"></div>
+        <div id="contador"></div>
+        <button id="proximoTurno" style="display:none">Próximo Turno</button>
     `;
+
     container.appendChild(modeContent);
 
-    let listaDeTextos = [...personagens];
-    let faseAtual = 1;
-    let contador = 1;
-    let personagensSorteados = [];
-
-    const botaoIniciar = document.getElementById("iniciarDesafio");
-    const botaoPedirDica = document.getElementById("pedirDica");
-    const botaoContador = document.getElementById("botaoContador");
-    const tempoRestanteDiv = document.getElementById("tempoRestante");
-    const personagensDiv = document.getElementById("personagensSorteados");
-
-    botaoIniciar.addEventListener("click", () => {
-        botaoIniciar.style.display = 'none';
-        personagensDiv.style.display = 'block';
-        botaoPedirDica.style.display = 'block';
-        botaoContador.style.display = 'block';
-        tempoRestanteDiv.style.display = 'block';
-
-        sortearPersonagens();
-        iniciarFase(faseAtual);
+    const adicionar = document.getElementById('adicionar');
+    adicionar.addEventListener('click', () => {
+        const novoInput = document.createElement('input');
+        novoInput.type = 'text';
+        novoInput.placeholder = `Participante ${document.querySelectorAll('.participante').length + 1}`;
+        novoInput.className = "participante";
+        document.getElementById("participantes").appendChild(novoInput);
     });
 
-    function sortearPersonagens() {
-        personagensSorteados = [];
-        for (let i = 0; i < 3; i++) {
-            const indiceAleatorio = Math.floor(Math.random() * listaDeTextos.length);
-            const textoSorteado = listaDeTextos[indiceAleatorio];
-            listaDeTextos.splice(indiceAleatorio, 1);
-            personagensSorteados.push(textoSorteado);
+    const iniciar = document.getElementById('iniciar');
+    iniciar.addEventListener('click', () => {
+        const inputs = document.querySelectorAll('.participante');
+        const participantes = Array.from(inputs).map(input => input.value.trim()).filter(nome => nome !== "");
+
+        if (participantes.length < 3) {
+            alert("Adicione ao menos 3 participantes.");
+            return;
         }
-        document.getElementById("personagem1").textContent = personagensSorteados[0].split('(')[0];
-        document.getElementById("personagem2").textContent = personagensSorteados[1].split('(')[0];
-        document.getElementById("personagem3").textContent = personagensSorteados[2].split('(')[0];
+
+        IniciarDesafio(participantes);
+    });
+
+    let turnoAtual = 0;
+    let intervalo;
+    let participantes = [];
+    let personagensSorteados = [];
+
+    function IniciarDesafio(participants) {
+        participantes = participants;
+        SortearPersonagens();
+        AtualizarPersonagens();
+        AtualizarTurno();
+        document.getElementById('proximoTurno').style.display = 'block';
     }
 
-    function iniciarFase(fase) {
-        let tempoRestante;
-        switch(fase) {
-            case 1:
-                tempoRestante = 60;
-                break;
-            case 2:
-                tempoRestante = 45;
-                break;
-            case 3:
-                tempoRestante = 30;
-                break;
-            default:
-                tempoRestante = 60;
+    function SortearPersonagens() {
+        const listaPersonagens = [...personagens];
+        personagensSorteados = [];
+
+        for (let i = 0; i < 3; i++) {
+            const indiceAleatorio = Math.floor(Math.random() * listaPersonagens.length);
+            personagensSorteados.push(listaPersonagens[indiceAleatorio]);
+            listaPersonagens.splice(indiceAleatorio, 1);
         }
+    }
 
-        tempoRestanteDiv.textContent = `Tempo restante: ${tempoRestante}s`;
+    function AtualizarTurno() {
+        clearInterval(intervalo);
 
-        const intervaloTempo = setInterval(() => {
-            tempoRestante--;
-            tempoRestanteDiv.textContent = `Tempo restante: ${tempoRestante}s`;
+        const turnoDiv = document.getElementById('turno');
+        turnoDiv.textContent = `Turno de: ${participantes[turnoAtual]}`;
 
-            if (tempoRestante <= 0) {
-                clearInterval(intervaloTempo);
-                botaoContador.disabled = true;
-                botaoPedirDica.disabled = true;
-                tempoRestanteDiv.textContent = 'Tempo esgotado!';
-                document.getElementById("resultado").textContent = "Você perdeu! O tempo acabou.";
+        const contadorDiv = document.getElementById('contador');
+        let tempo = 60;
+        contadorDiv.textContent = `Tempo restante: ${tempo} segundos`;
+
+        intervalo = setInterval(() => {
+            tempo--;
+            contadorDiv.textContent = `Tempo restante: ${tempo} segundos`;
+            if (tempo <= 0) {
+                clearInterval(intervalo);
+                ProximoTurno();
             }
         }, 1000);
     }
 
-    let dicaUsada = false;
+    function ProximoTurno() {
+        turnoAtual = (turnoAtual + 1) % participantes.length;
+        SortearPersonagens();
+        AtualizarPersonagens();
+        AtualizarTurno();
+    }
 
-    botaoPedirDica.addEventListener("click", () => {
-        if (!dicaUsada) {
-            const dicas = personagensSorteados.map(p => `Dica: ${p.split('(')[1]}`);
-            document.getElementById("resultadoDica").textContent = dicas.join(' | ');
-            document.getElementById("resultadoDica").style.display = 'block';
-            dicaUsada = true;
-        } else {
-            alert("Você já usou a dica para esta fase.");
-        }
-    });
+    function AtualizarPersonagens() {
+        const personagensContainer = document.getElementById('personagens');
+        personagensContainer.innerHTML = personagensSorteados.map(personagem => `<div>${personagem}</div>`).join('');
+    }
 
-    botaoContador.addEventListener("click", () => {
-        contador--;
-        botaoContador.textContent = "Pergunta Nº " + contador;
-
-        if (contador === 0) {
-            botaoContador.disabled = true;
-            faseAtual++;
-            iniciarFase(faseAtual);
-            sortearPersonagens();
-            botaoContador.disabled = false;
-            botaoContador.textContent = "Pergunta Nº " + 1;
-            contador = 1;
-        }
+    const proximoTurnoButton = document.getElementById('proximoTurno');
+    proximoTurnoButton.addEventListener('click', () => {
+        ProximoTurno();
     });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const jogar = document.getElementById('challenger');
+    if (jogar) {
+        jogar.addEventListener('click', () => {
+            const container = document.getElementById('modeContainer');
+            if (container) {
+                ModeChallenger(container);
+            }
+        });
+    }
+});
