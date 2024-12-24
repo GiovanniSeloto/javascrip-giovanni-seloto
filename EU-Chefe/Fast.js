@@ -100,7 +100,7 @@ function ModeFast(container) {
             contador = 0;
             botaoContador.textContent = "Pergunta Nº " + contador;
             botaoContador.disabled = true;
-            aviso.textContent = "Agora é com você, já foram feitas todas perguntas!";
+            aviso.textContent = "Agora é com você, já foram feitas todas as perguntas!";
         }
     });
 }

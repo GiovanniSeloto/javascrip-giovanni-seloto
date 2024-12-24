@@ -6,24 +6,37 @@ function ModeChallenger(container) {
 
     const modeContent = document.createElement('div');
     modeContent.innerHTML = `
-        <div>ESTÃO PRONTOS PARA O DESAFIO ?</div>
-        <div>Insira o nome dos participantes:</div>
+    <div>   
         <div id="participantes"> 
             <input type="text" placeholder="Participante" class="participante">
             <input type="text" placeholder="Participante" class="participante">
             <input type="text" placeholder="Participante" class="participante">
         </div>
-        <button id="adicionar">Adicionar Participante</button>
-        <button id="iniciar">Iniciar</button>
-        <div id="dica"></div>
+        <div class="title">ESTÃO PRONTOS PARA O DESAFIO?</div>
+        <div id="container">
+            <button id="adicionar">Adicionar</button>
+            <button id="iniciar">Iniciar</button>
+        </div>
+        <div id="game">
+            <div id="personagens"></div>
+            <div id="turno"></div>
+            <div id="contador"></div>
+        </div>
+        <div id="containerTurno">
+            <button id="proximoTurno" style="display:none">Próximo Turno</button>
+            <button id="botaoContador" style="display:none">Pergunta Nº 6</button>
+        </div>
         <div id="resultado"></div>
-        <div id="personagens"></div>
-        <div id="turno"></div>
-        <div id="contador"></div>
-        <button id="proximoTurno" style="display:none">Próximo Turno</button>
+        <div id="resultadoDica" style="display:none;"></div>
+        <div id="aviso"></div>
+    </div>
     `;
 
     container.appendChild(modeContent);
+
+    let contador = 6;
+    const botaoContador = document.getElementById("botaoContador");
+    const aviso = document.getElementById('aviso');
 
     const adicionar = document.getElementById('adicionar');
     adicionar.addEventListener('click', () => {
@@ -58,6 +71,7 @@ function ModeChallenger(container) {
         AtualizarPersonagens();
         AtualizarTurno();
         document.getElementById('proximoTurno').style.display = 'block';
+        document.getElementById('botaoContador').style.display = 'block';
     }
 
     function SortearPersonagens() {
@@ -91,6 +105,14 @@ function ModeChallenger(container) {
         }, 1000);
     }
 
+    function AtualizarPersonagens() {
+        const personagensContainer = document.getElementById('personagens');
+        personagensContainer.innerHTML = personagensSorteados.map(personagem => {
+             const partes = personagem.split('(');
+            return `<div>${partes[0]}</div>`
+        }).join('');
+    }
+
     function ProximoTurno() {
         turnoAtual = (turnoAtual + 1) % participantes.length;
         SortearPersonagens();
@@ -98,14 +120,30 @@ function ModeChallenger(container) {
         AtualizarTurno();
     }
 
-    function AtualizarPersonagens() {
-        const personagensContainer = document.getElementById('personagens');
-        personagensContainer.innerHTML = personagensSorteados.map(personagem => `<div>${personagem}</div>`).join('');
-    }
-
     const proximoTurnoButton = document.getElementById('proximoTurno');
     proximoTurnoButton.addEventListener('click', () => {
         ProximoTurno();
+    });
+
+    botaoContador.addEventListener("click", function () {
+        contador--;
+        botaoContador.textContent = "Pergunta Nº " + contador;
+
+        if (contador === 3) {
+            document.getElementById("resultadoDica").style.display = 'block'; 
+            const dicaPersonagem = personagensSorteados.map(personagem => {
+                const partes = personagem.split('(');
+                return partes[1];
+            }).join(', ');
+    
+            document.getElementById("resultado").innerHTML =`Dica: ${dicaPersonagem}` ;
+            document.getElementById("resultadoDica").textContent = "";
+        }
+
+        if (contador === 0) {
+            botaoContador.disabled = true;
+            aviso.textContent = "Agora é com você, já foram feitas todas as perguntas!";
+        }
     });
 }
 

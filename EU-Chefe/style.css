@@ -91,8 +91,47 @@
 
     #resultado,
     #resultadoDica,
-    #tempo
+    #tempo,
     #aviso{
         margin: 20px;
         font-size: 20px;
+    }
+
+    .title{
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 20px;
+    }
+
+    .participante{
+        border-radius: 5px;
+        margin-bottom: 20px;
+        border: 1px black;
+        padding: 5px;
+    }
+
+    #game{
+        text-align: center;
+        margin: 10px;
+    }
+
+    #container,#resultado{
+        text-align: center;
+    }
+
+    #resultado,
+    #personagens,
+    #turno,
+    #contador{
+        font-size: 20px;
+        margin: 5px;
+    }
+
+    #iniciar{
+        min-width: 150px;
+    }
+
+    #containerTurno{
+        display: flex;
+        justify-content: space-between;
     }
